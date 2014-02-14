@@ -80,4 +80,20 @@ describe Sudoku::Cell do
       end
     end
   end
+
+  describe ".to_s" do
+    context "when the value is not 0" do
+      it "it returns the value" do
+        1.upto(9) do |n|
+          Sudoku::Cell.new(n).to_s.should eq(n.to_s)
+        end 
+      end
+    end
+
+    context "when the value is 0" do
+      it "returns a dot" do
+        Sudoku::Cell.new(0).to_s.should eq(".")
+      end
+    end
+  end
 end

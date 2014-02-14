@@ -34,6 +34,14 @@ module Sudoku
       other.value == value
     end
 
+    def to_s
+      if value == 0
+        "."
+      else
+        value.to_s
+      end
+    end
+
     class << self
       def parse(character)
         Sudoku::Cell.new(character.to_i)
