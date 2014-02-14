@@ -1,3 +1,5 @@
+require 'sudoku/region'
 require 'sudoku/grid'
 require 'sudoku/grid_parser'
 require 'sudoku/cell'
+require 'sudoku/solver'
