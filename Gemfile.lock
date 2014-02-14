@@ -62,3 +62,4 @@ DEPENDENCIES
   hamster
   rake
   rspec
+  thor
