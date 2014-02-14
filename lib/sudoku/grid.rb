@@ -9,6 +9,16 @@ module Sudoku
       rows.transpose
     end
 
+    def cells
+      rows.inject([]) {|sum, row| sum += row}
+    end
+
+    def to_s
+      rows.map do |row|2
+        row.map(&:to_s).join
+      end.join("\n")
+    end
+
     class << self
 
       def parse(string)

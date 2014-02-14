@@ -20,4 +20,16 @@ describe Sudoku::Grid do
     end
   end
 
+  describe ".to_s" do
+    it "returns a pretty string" do
+      string = Array.new(9, ".........").join("\n")
+      grid.to_s.should eq(string)
+    end
+  end
+
+  describe ".cells" do
+    it "returns a big array of cells" do
+      grid.cells.size.should eq(9*9)
+    end
+  end
 end
