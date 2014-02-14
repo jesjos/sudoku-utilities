@@ -9,5 +9,11 @@ module Sudoku
         Sudoku::Cell.parse(char)
       end
     end
+
+    def parse_string(string)
+      string.each_line.map do |line|
+        parse_line(line)
+      end      
+    end
   end
 end
