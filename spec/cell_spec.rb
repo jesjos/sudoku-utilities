@@ -96,4 +96,15 @@ describe Sudoku::Cell do
       end
     end
   end
+
+  describe ".possible_values" do
+    context "when created empty" do
+      it "is populated with values 1 to 9" do
+        cell.possible_values.should eq((1..9).to_a)
+      end
+    end
+  end
+
+
+
 end
