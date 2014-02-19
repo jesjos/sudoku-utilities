@@ -27,6 +27,7 @@ module Sudoku
 
     def value=(i)
       sanity_check!(i)
+      possible_values = []
       @value = i
     end
 
