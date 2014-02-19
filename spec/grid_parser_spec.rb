@@ -2,10 +2,10 @@ require 'spec_helper'
 
 describe Sudoku::GridParser do
   let(:parser) { Sudoku::GridParser.new }
-  let(:cell_row) { cells = 1.upto(9).map {|i| Sudoku::Cell.new(i)} }
+  let(:cell_row) { cells = 1.upto(9).to_a }
   describe ".parse_line" do
     it "returns an array of cells" do
-      parsed_cells = parser.parse_line("123456789")
+      parsed_cells = parser.parse_line_with_number("123456789", 1)
       cell_row.zip(parsed_cells).each do |(one, other)|
         one.should eql(other)
       end
