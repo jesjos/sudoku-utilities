@@ -5,10 +5,12 @@ module Sudoku
   # represent an empty cell, which is in turn represented by the
   # value 0.
   class Cell
-    attr_accessor :value, :possible_values
-    def initialize(value = 0)
+    attr_accessor :value, :possible_values, :row, :column
+    def initialize(value = 0, options = {})
       sanity_check!(value)
       @value = value
+      @row = options[:row]
+      @column = options[:column]
       init_possible_values
     end
 
