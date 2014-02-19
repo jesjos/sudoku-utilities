@@ -71,4 +71,18 @@ describe Sudoku::Grid do
       grid.quadrants.size.should eq(9)
     end
   end
+
+  describe ".clone" do
+    it "returns a grid with the same values but with different object_ids" do
+      other = filled_grid.clone
+      other.cells.map(&:object_id).should_not eq(filled_grid.cells.map(&:object_id))
+      other.cells.map(&:value).should eq(filled_grid.cells.map(&:value))
+    end
+  end
+
+  describe ".regions" do
+    it "creates 27 regions" do
+      grid.regions.size.should eq(3*9)
+    end
+  end
 end

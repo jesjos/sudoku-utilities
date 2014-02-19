@@ -1,42 +1,48 @@
 module Sudoku
   class Solver
 
-    attr_reader :grid
-
-    def initialize(grid)
-      @grid = grid
+    def set_next_value(grid)
+      cell = next_cell_to_set(grid)
+      puts "setting next value for cell with possible values #{cell.possible_values}"
+      return false if cell.possible_values.empty?
+      cell.value = cell.possible_values.first
     end
 
-    def regions
-      @regions ||= column_regions + row_regions + quadrant_regions
+    def next_cell_to_set(grid)
+      sorted = empty_cells.sort do |one, other|
+        one.possible_values.size <=> other.possible_values.size
+      end
+      sorted.first
     end
 
-    def column_regions
-      @column_regions ||= grid.columns.map {|column| Sudoku::Region.new(column)}
+    def solve(grid)
+      set_possible_values(grid)
+      cells = grid.empty_cells.sort do |one, other| 
+        one.possible_values.size <=> other.possible_values.size
+      end
+      cells = Hamster.list(*cells)
+      _solve(grid, cells)
     end
 
-    def row_regions
-      @row_regions ||= grid.rows.map {|row| Sudoku::Region.new(row)}
-    end
+    def _solve(grid)
+      return true if solved?(grid)
+      grid.empty_cells.each_with_index do |cell|
 
-    def quadrant_regions
-      @quadrant_regions ||= grid.quadrants.map {|quadrant| Sudoku::Region.new(quadrant)}
-    end
-
-    def solve
-      set_possible_values
-      while !solved?
-        set_next_value
-        set_possible_values
       end
     end
 
-    def set_possible_values
-      regions.each &:set_possible_values
+    def solve_for_grid_and_cell(grid, cell)
+      return if solved?
+      cell.possible_values.any? do |value|
+      end
     end
 
-    def solved?
-      
+    def set_possible_values(grid)
+      grid.regions.each &:set_possible_values
+    end
+
+    def solved?(grid)
+      grid.regions.all? {|region| region.complete? }
     end
   end
 end
