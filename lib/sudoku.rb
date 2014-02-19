@@ -1,5 +1,6 @@
 require 'thor'
 require 'forwardable'
+require 'hamster'
 ['sudoku/region',
 'sudoku/grid',
 'sudoku/grid_parser',
