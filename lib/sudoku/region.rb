@@ -14,9 +14,12 @@ module Sudoku
     end
 
     def non_empty_cell_values
-      cells.inject([]) do |non_empty_values, cell|
-        return non_empty_values if cell.empty?
-        non_empty_values << cell.value
+      cells.inject([]) do |values, cell|
+        if cell.empty?
+          values
+        else
+          values << cell.value
+        end
       end
     end
 
@@ -26,7 +29,7 @@ module Sudoku
 
     def set_possible_values
       empty_cells.each do |cell|
-        cell.possible_values = unused_values
+        cell.possible_values -= non_empty_cell_values
       end
     end
 
@@ -39,7 +42,7 @@ module Sudoku
     end
 
     def unused_values
-       complete_values - non_empty_cell_values
+      complete_values - non_empty_cell_values
     end
 
     def complete_values
