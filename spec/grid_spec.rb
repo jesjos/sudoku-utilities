@@ -5,12 +5,12 @@ describe Sudoku::Grid do
   let(:filled_grid) { Sudoku::Grid.parse(Array.new(9, "123456789").join("\n"))}
   
   describe ".rows" do
-    it "returns an array of 9 arrays" do
+    it "returns an array of 9 vectors" do
       grid.rows.size.should eq(9)
       grid.rows.each {|row| row.size.should eq(9)}
     end
-    it "returns an array of arrays of cells" do
-      grid.rows.each {|row| row.each {|cell| cell.should be_a Sudoku::Cell }}
+    it "returns an array of arrays of integers" do
+      grid.rows.each {|row| row.each {|cell| cell.should be_a Integer }}
     end
   end
 
@@ -31,8 +31,7 @@ describe Sudoku::Grid do
 
     context "when the grid has some actual cells" do
       it "returns a pretty string" do
-        grid = Sudoku::Grid.new
-        grid.cells.each {|cell| cell.value = 1}
+        grid = Sudoku::Grid.new(1)
         output = Array.new(9, Array.new(9, "1").join).join("\n")
         grid.to_s.should eq(output)
       end      
@@ -50,6 +49,12 @@ describe Sudoku::Grid do
   describe ".cells" do
     it "returns a big array of cells" do
       grid.cells.size.should eq(9*9)
+    end
+  end
+
+  describe ".cell_rows" do
+    it "returns an array of arrays of cells" do
+      grid.cell_rows.all? {|row| row.all? {|cell| cell.is_a? Sudoku::Cell}}
     end
   end
 
@@ -72,17 +77,29 @@ describe Sudoku::Grid do
     end
   end
 
-  describe ".clone" do
-    it "returns a grid with the same values but with different object_ids" do
-      other = filled_grid.clone
-      other.cells.map(&:object_id).should_not eq(filled_grid.cells.map(&:object_id))
-      other.cells.map(&:value).should eq(filled_grid.cells.map(&:value))
-    end
-  end
-
   describe ".regions" do
     it "creates 27 regions" do
       grid.regions.size.should eq(3*9)
+    end
+  end
+
+  describe ".set" do
+    it "returns a new grid" do
+      grid2 = grid.set(row: 0, column: 0, value: 1)
+      grid2.should_not eq(grid)
+    end
+
+    it "returns a grid where the cell is set" do
+      grid2 = grid.set(row: 0, column: 0, value: 1)
+      grid2.rows.get(0).get(0).should eq(1)
+    end
+  end
+
+  describe ".get" do
+    it "returns a value at a particular cell" do
+      grid.get(0,0).should eq(0)
+      grid2 = grid.set(row: 0, column: 0, value: 1)
+      grid2.get(0,0).should eq(1)
     end
   end
 end
