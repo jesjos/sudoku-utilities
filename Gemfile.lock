@@ -8,6 +8,7 @@ GEM
       nio4r (>= 0.5.0)
     coderay (1.1.0)
     diff-lcs (1.2.5)
+    dispel (0.0.4)
     dotenv (0.9.0)
     ffi (1.9.3)
     foreman (0.63.0)
@@ -56,6 +57,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  dispel
   foreman
   guard
   guard-rspec
