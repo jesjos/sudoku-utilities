@@ -19,6 +19,12 @@ describe Sudoku::Grid do
       grid.columns.size.should eq(9)
       grid.columns.each {|column| column.size.should eq(9)}
     end
+
+    it "returns an array where the rows are columns" do
+      filled_grid.columns.each_with_index.all? do |row,i| 
+        row.all? {|cell| cell.value.should eq(i + 1) }
+      end
+    end
   end
 
   describe ".to_s" do

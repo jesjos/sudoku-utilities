@@ -14,19 +14,21 @@ module Sudoku
     end
 
     def columns
-      @columns ||= rows.to_a.transpose
+      @columns ||= cell_rows.transpose
     end
 
     def quadrants
       @quadrants ||= [0,3,6].repeated_permutation(2).inject([]) do |memo, (row, column)|
-        affected_rows = rows.to_a[row..row + 2]
-        memo << affected_rows.inject([]) {|quadrant, row| quadrant + row.to_a[column..column+2]}
+        affected_rows = cell_rows[row..row + 2]
+        memo << affected_rows.inject([]) {|quadrant, row| quadrant + row[column..column+2]}
       end
     end
 
     def cell_rows
-      rows.to_a.map do |row|
-        row.to_a.map {|value| Cell.new value}
+      @cell_rows ||= rows.to_a.each_with_index.map do |row, row_index|
+        row.to_a.each_with_index.map do |value, column_index| 
+          Cell.new value, row: row_index, column: column_index, grid: self
+        end
       end
     end
 
@@ -39,13 +41,13 @@ module Sudoku
     end
 
     def to_s
-      cell_rows.map do |row|
-        row.map(&:to_s).join
-      end.join("\n")
+      rows_to_s.join "\n"
     end
 
-    def clone_row(row)
-      row.map {|cell| cell.clone}
+    def rows_to_s
+      cell_rows.map do |row|
+        row.map(&:to_s).join
+      end
     end
 
     def regions
@@ -57,7 +59,7 @@ module Sudoku
     end
 
     def row_regions
-      @row_regions ||= rows.map {|row| Sudoku::Region.new(row)}
+      @row_regions ||= cell_rows.map {|row| Sudoku::Region.new(row)}
     end
 
     def quadrant_regions
@@ -71,6 +73,10 @@ module Sudoku
       Grid.new new_rows
     end
 
+    def set_possible_values
+      regions.each &:set_possible_values
+    end
+
     def get(row, column)
       rows[row][column]
     end
@@ -82,6 +88,10 @@ module Sudoku
 
     def set_empty_rows
       fill_rows_with_value(0)
+    end
+
+    def cells_by_number_of_possible_values
+      cells.sort {|one, other| one.number_of_possible_values <=> other.number_of_possible_values}
     end
 
     class << self
