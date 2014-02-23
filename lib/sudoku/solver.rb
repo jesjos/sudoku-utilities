@@ -1,48 +1,50 @@
 module Sudoku
   class Solver
 
-    def set_next_value(grid)
-      cell = next_cell_to_set(grid)
-      puts "setting next value for cell with possible values #{cell.possible_values}"
-      return false if cell.possible_values.empty?
-      cell.value = cell.possible_values.first
+    attr_reader :grid, :callback
+
+    def initialize(grid, &block)
+      @grid = grid
+      @callback = block
     end
 
-    def next_cell_to_set(grid)
-      sorted = empty_cells.sort do |one, other|
-        one.possible_values.size <=> other.possible_values.size
-      end
-      sorted.first
-    end
-
-    def solve(grid)
-      set_possible_values(grid)
-      cells = grid.empty_cells.sort do |one, other| 
-        one.possible_values.size <=> other.possible_values.size
-      end
-      cells = Hamster.list(*cells)
-      _solve(grid, cells)
-    end
-
-    def _solve(grid)
-      return true if solved?(grid)
-      grid.empty_cells.each_with_index do |cell|
-
+    def solve
+      result = benchmark do
+        solve_grid(grid)
       end
     end
 
-    def solve_for_grid_and_cell(grid, cell)
-      return if solved?
-      cell.possible_values.any? do |value|
-      end
+    def total_time
+      @stopped_at - @started_at
     end
 
-    def set_possible_values(grid)
-      grid.regions.each &:set_possible_values
+    def solve_grid(grid)
+      grid.set_possible_values
+      return false if unsolvable? grid
+      return grid if solved? grid
+      grid.cells_by_number_of_possible_values.find do |cell|
+        cell.possible_values.find do |value|
+          new_grid = cell.set(value)
+          callback.call(new_grid) if callback
+          @solved_grid = solve_grid(new_grid)
+        end
+      end
+      @solved_grid
     end
 
     def solved?(grid)
       grid.regions.all? {|region| region.complete? }
+    end
+
+    def unsolvable?(grid)
+      grid.cells.any? {|cell| cell.empty? && cell.no_possible_values? }
+    end
+
+    def benchmark
+      @started_at = Time.now
+      result = yield
+      @stopped_at = Time.now
+      result
     end
   end
 end
