@@ -9,12 +9,11 @@ module Sudoku
           file = File.open(path)
           grid = Grid.parse(file.read)
           solver = Solver.new(grid, &print_method)
-          solver.solve
+          result = solver.solve
           window.clear
           window << "Solving took: #{solver.total_time} seconds\n"
-          window << "Found #{solver.solved_grids.size} solutions"
           window << "Sudoku:\n"
-          window << solver.solved_grids.first.to_s
+          window << result.to_s
         rescue Exception => e
           window.clear
           window << "Something went wrong, #{e.message}"

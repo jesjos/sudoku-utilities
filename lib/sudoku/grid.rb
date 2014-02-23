@@ -41,7 +41,10 @@ module Sudoku
     end
 
     def to_s
-      rows_to_s.join "\n"
+      output = rows_to_s.join "\n"
+      output += "\n"
+      output += cells.map(&:possible_values).inspect
+      output
     end
 
     def rows_to_s
