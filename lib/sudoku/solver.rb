@@ -1,11 +1,13 @@
 module Sudoku
   class Solver
 
-    attr_reader :grid, :callback
+    attr_reader :grid, :callback, :solved_grids, :visited_grids
 
     def initialize(grid, &block)
       @grid = grid
       @callback = block
+      @visited_grids = {}
+      @solved_grids = []
     end
 
     def solve
@@ -19,17 +21,30 @@ module Sudoku
     end
 
     def solve_grid(grid)
-      grid.set_possible_values
-      return false if unsolvable? grid
-      return grid if solved? grid
-      grid.cells_by_number_of_possible_values.find do |cell|
-        cell.possible_values.find do |value|
-          new_grid = cell.set(value)
-          callback.call(new_grid) if callback
-          @solved_grid = solve_grid(new_grid)
+      if unsolvable?(grid) || visited?(grid)
+        false
+      end
+      visit(grid)
+      if solved? grid
+        solved_grids << grid
+        grid
+      else
+        grid.cells_by_number_of_possible_values.each do |cell|
+          cell.possible_values.each do |value|
+            new_grid = cell.set(value)
+            callback.call(new_grid) if callback
+            solve_grid(new_grid)
+          end
         end
       end
-      @solved_grid
+    end
+
+    def visit(grid)
+      visited_grids[grid.to_s] = true
+    end
+
+    def visited?(grid)
+      visited_grids.has_key? grid.to_s
     end
 
     def solved?(grid)

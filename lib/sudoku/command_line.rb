@@ -62,7 +62,7 @@ module Sudoku
     end
 
     def print_method
-      -> (grid) { window.clear; window << grid.to_s; window.refresh }
+      -> (grid) { window.clear; window << grid.to_s; window.refresh }#; window.getch }
     end
   end
 end

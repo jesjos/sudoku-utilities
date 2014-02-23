@@ -11,6 +11,7 @@ module Sudoku
       else
         set_empty_rows
       end
+      set_possible_values
     end
 
     def columns
