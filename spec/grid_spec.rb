@@ -2,110 +2,126 @@ require 'spec_helper'
 
 describe Sudoku::Grid do
   let(:grid) { Sudoku::Grid.new }
-  let(:filled_grid) { Sudoku::Grid.parse(Array.new(9, "123456789").join("\n"))}
-  
-  describe ".rows" do
-    it "returns an array of 9 vectors" do
-      grid.rows.size.should eq(9)
-      grid.rows.each {|row| row.size.should eq(9)}
+  describe ".values" do
+    it "is a hash" do
+      grid.values.should respond_to(:keys)
     end
-    it "returns an array of arrays of integers" do
-      grid.rows.each {|row| row.each {|cell| cell.should be_a Integer }}
+
+    describe ".keys" do
+      it "returns all the needed keys" do
+        keys = ("A".."I").map {|col| (1..9).map {|row| "#{col}#{row}"}}
+        Set.new(grid.values.keys.to_a.flatten).should eq(Set.new(keys.flatten))
+      end
     end
   end
 
-  describe ".columns" do
-    it "returns an array of 9 arrays" do
-      grid.columns.size.should eq(9)
-      grid.columns.each {|column| column.size.should eq(9)}
+  describe ".column_keys" do
+    it "returns numbers 1 to 9" do
+      grid.column_keys.should eq((1..9).to_a)
     end
+  end
 
-    it "returns an array where the rows are columns" do
-      filled_grid.columns.each_with_index.all? do |row,i| 
-        row.all? {|cell| cell.value.should eq(i + 1) }
-      end
+  describe ".row_keys" do
+    it "returns the letters a to i" do
+      grid.row_keys.should eq(("A".."I").to_a)
     end
   end
 
   describe ".to_s" do
-    context "when the grid is empty" do
-      it "returns a pretty string" do
-        string = Array.new(9, ".........").join("\n")
-        grid.to_s.should eq(string)
+    context "when given an empty sudoku" do
+      it "returns 9x9 string of dots" do
+        empty_sudoku = Array.new(9, Array.new(9, ".").join).join "\n"
+        grid.to_s.should eq(empty_sudoku)
+      end
+    end
+  end
+
+  describe ".to_s_cell" do
+    context "when the cell hasn't been set" do
+      it "returns a dot" do
+        grid.to_s_cell([1,2,3]).should eq(".")
       end
     end
 
-    context "when the grid has some actual cells" do
-      it "returns a pretty string" do
-        grid = Sudoku::Grid.new(1)
-        output = Array.new(9, Array.new(9, "1").join).join("\n")
-        grid.to_s.should eq(output)
-      end      
+    context "when the cell has been set" do
+      it "returns the cell's value" do
+        grid.to_s_cell([1]).should eq("1")
+      end
     end
+  end
 
+  describe ".row_peer_keys" do
+    it "returns the correct row keys" do
+      keys = 2.upto(9).map {|n| "A#{n}"}
+      grid.row_peer_keys("A1").should eq(keys)
+    end
+  end
+
+  describe ".column_peer_keys" do
+    it "returns the set of keys" do
+      keys = "B".upto("I").map {|c| "#{c}1"}
+      grid.column_peer_keys("A1").should eq(keys)
+    end
+  end
+
+  describe ".box_peer_keys" do
+    it "returns the correct set of keys" do
+      keys = ["A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"]
+      grid.box_peer_keys("A1").should eq(keys)
+    end
+  end
+
+  describe ".extract_row" do
+    it "returns the first character of the key" do
+      grid.extract_row("A1").should eq("A")
+    end
+  end
+
+  describe ".extract_column" do
+    it "returns the second character of the key" do
+      grid.extract_column("A1").should eq("1")
+    end
+  end
+
+  describe ".box_row_keys" do
+    context "when given a letter in an interval" do
+      [("A".."C"), ("D".. "F"), ("G".."I")].each do |interval|
+        it "returns that interval" do
+          interval.each do |letter|
+            grid.box_row_keys("#{letter}1").should eq(interval.to_a)
+          end
+        end
+      end
+    end
+  end
+
+  describe ".box_column_keys" do
+    context "when given a letter in an interval" do
+      [(1..3), (4..6), (7..9)].each do |interval|
+        it "returns that interval" do
+          interval.each do |number|
+            grid.box_column_keys("A#{number}").should eq(interval.to_a)
+          end
+        end
+      end
+    end
+  end
+
+  describe ".eliminate" do
+    it "eliminates the value from all peers" do
+      grid.eliminate("A1", 1)
+      grid.peer_keys("A1").each do |key|
+        Set.new(grid.values[key].to_a).should eq(Set.new(2.upto(9).to_a))
+      end
+    end
+  end
+
+  describe "#parse" do
+    let(:string) { File.open("./spec/test_grids/basic.txt").read }
     describe "two-way" do
       it "returns the same string" do
-        input = Array.new(9, "123456789").join("\n")
-        grid = Sudoku::Grid.parse(input)
-        grid.to_s.should eq(input)
+        Sudoku::Grid.parse(string).to_s.should eq(string)
       end
-    end
-  end
-
-  describe ".cells" do
-    it "returns a big array of cells" do
-      grid.cells.size.should eq(9*9)
-    end
-  end
-
-  describe ".cell_rows" do
-    it "returns an array of arrays of cells" do
-      grid.cell_rows.all? {|row| row.all? {|cell| cell.is_a? Sudoku::Cell}}
-    end
-  end
-
-  describe ".quadrants" do
-    let(:quadrants) do
-      base = [
-        [1,2,3,1,2,3,1,2,3].map(&:to_s),
-        [4,5,6,4,5,6,4,5,6].map(&:to_s),
-        [7,8,9,7,8,9,7,8,9].map(&:to_s)
-      ]
-      base = base + base + base
-    end
-    it "returns correct quadrants" do
-      quadrant_values = filled_grid.quadrants.map{|quadrant| quadrant.map &:to_s }
-      (quadrant_values - quadrants).should be_empty
-    end
-
-    it "returns the correct number of quadrants" do
-      grid.quadrants.size.should eq(9)
-    end
-  end
-
-  describe ".regions" do
-    it "creates 27 regions" do
-      grid.regions.size.should eq(3*9)
-    end
-  end
-
-  describe ".set" do
-    it "returns a new grid" do
-      grid2 = grid.set(row: 0, column: 0, value: 1)
-      grid2.should_not eq(grid)
-    end
-
-    it "returns a grid where the cell is set" do
-      grid2 = grid.set(row: 0, column: 0, value: 1)
-      grid2.rows.get(0).get(0).should eq(1)
-    end
-  end
-
-  describe ".get" do
-    it "returns a value at a particular cell" do
-      grid.get(0,0).should eq(0)
-      grid2 = grid.set(row: 0, column: 0, value: 1)
-      grid2.get(0,0).should eq(1)
     end
   end
 end

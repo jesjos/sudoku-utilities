@@ -1,20 +1,18 @@
 module Sudoku
   class GridParser
-    def parse_line_with_number(line, row_index)
-      row = Hamster.vector
-      line.chars.each_with_index do |char, column|
-        cell = char.to_i
-        row = row.add cell 
-      end
-      row
+    def parse_line(line)
+      line.chars.map(&:to_i)
     end
 
     def parse_string(string)
-      rows = Hamster.vector
-      string.each_line.each_with_index do |line, i|
-        rows = rows.add parse_line_with_number(line.strip, i)
+      values = string.each_line.reduce([]) do |values, line|
+        values += parse_line(line.strip)
       end
-      Sudoku::Grid.new rows
+      values
+    end
+
+    def parse(string)
+      Sudoku::Grid.new parse_string(string)
     end
   end
 end

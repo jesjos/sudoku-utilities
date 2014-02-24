@@ -1,109 +1,167 @@
 module Sudoku
   class Grid
-    attr_reader :rows
-    def initialize(arg = nil)
-      if arg
-        if arg.respond_to? :each
-          @rows = arg
-        else
-          fill_rows_with_value(arg)
-        end
-      else
-        set_empty_rows
-      end
-      set_possible_values
+
+    ROW_KEYS = ("A".."I").to_a
+    COLUMN_KEYS = (1..9).to_a
+
+    attr_accessor :values
+    
+    def initialize(input = nil)
+      @values = Hamster.hash
+      set_initial_values(input)
     end
 
-    def columns
-      @columns ||= cell_rows.transpose
+    def column_keys
+      COLUMN_KEYS
     end
 
-    def quadrants
-      @quadrants ||= [0,3,6].repeated_permutation(2).inject([]) do |memo, (row, column)|
-        affected_rows = cell_rows[row..row + 2]
-        memo << affected_rows.inject([]) {|quadrant, row| quadrant + row[column..column+2]}
-      end
+    def row_keys
+      ROW_KEYS
     end
 
-    def cell_rows
-      @cell_rows ||= rows.to_a.each_with_index.map do |row, row_index|
-        row.to_a.each_with_index.map do |value, column_index| 
-          Cell.new value, row: row_index, column: column_index, grid: self
+    # Since Hamster::Set doesn't guarantee sorted keys,
+    # we'll use this method to ensure a sorted key set.
+    def sorted_keys
+      @sorted_keys ||= ROW_KEYS.reduce([]) do |keys, row| 
+        COLUMN_KEYS.reduce(keys) do |keys, column| 
+          keys << construct_key(row, column)
         end
       end
-    end
-
-    def cells
-      @cells ||= cell_rows.inject([]) {|sum, row| sum += row }
-    end
-
-    def empty_cells
-      cells.reject {|cell| !cell.empty?}      
     end
 
     def to_s
-      output = rows_to_s.join "\n"
-      output += "\n"
-      output += cells.map(&:possible_values).inspect
-      output
+      cells_as_strings.each_slice(9).to_a.map(&:join).join("\n")
     end
 
-    def rows_to_s
-      cell_rows.map do |row|
-        row.map(&:to_s).join
+    def cells_as_strings
+      sorted_keys.map {|key| to_s_cell(values[key])}
+    end
+
+    def to_s_cell(cell)
+      if cell.size == 1
+        cell.first.to_s
+      else
+        "."
       end
-    end
-
-    def regions
-      @regions ||= column_regions + row_regions + quadrant_regions
-    end
-
-    def column_regions
-      @column_regions ||= columns.map {|column| Sudoku::Region.new(column)}
-    end
-
-    def row_regions
-      @row_regions ||= cell_rows.map {|row| Sudoku::Region.new(row)}
-    end
-
-    def quadrant_regions
-      @quadrant_regions ||= quadrants.map {|quadrant| Sudoku::Region.new(quadrant)}
-    end
-
-    def set(args)
-      row_index, col_index, value = args[:row], args[:column], args[:value]
-      new_row   = rows[row_index].set(col_index, value)
-      new_rows  = rows.set(row_index, new_row)
-      Grid.new new_rows
-    end
-
-    def set_possible_values
-      regions.each &:set_possible_values
-    end
-
-    def get(row, column)
-      rows[row][column]
-    end
-
-    def fill_rows_with_value(value)
-      rows = 1.upto(9).map {|n| Hamster.vector(*Array.new(9,value))}
-      @rows = Hamster.vector(*rows)
-    end
-
-    def set_empty_rows
-      fill_rows_with_value(0)
-    end
-
-    def cells_by_number_of_possible_values
-      cells.sort {|one, other| one.number_of_possible_values <=> other.number_of_possible_values}
     end
 
     class << self
 
       def parse(string)
-        Sudoku::GridParser.new.parse_string(string)
+        Sudoku::GridParser.new.parse(string)
       end
 
+    end
+
+    def default_possible_values
+      Hamster.set *(1..9).to_a
+    end
+
+    def peer_keys(key)
+      row_peer_keys(key) + column_peer_keys(key) + box_peer_keys(key)
+    end
+
+    def row_peer_keys(key)
+      row = extract_row key
+      keys = column_keys.map {|column| construct_key(row, column)}
+      keys.reject{|output_key| output_key == key }
+    end
+
+    def column_peer_keys(key)
+      column = extract_column key
+      keys = row_keys.map {|row| construct_key(row, column)}
+      keys.reject{|output_key| output_key == key }
+    end
+
+    def box_peer_keys(key)
+      row_keys = box_row_keys(key)
+      column_keys = box_column_keys(key)
+      keys = row_keys.reduce([]) do |keys, row|
+        keys += column_keys.map {|col| construct_key(row, col)}
+      end
+      keys.reject{|output_key| output_key == key}
+    end
+
+    def box_row_keys(key)
+      row = extract_row key
+      case row
+      when "A".."C"
+        ["A", "B", "C"]
+      when "D".."F"
+        ["D", "E", "F"]
+      when "G".."I"
+        ["G", "H", "I"]
+      end
+    end
+
+    def box_column_keys(key)
+      column = extract_column key
+      case column.to_i
+      when (1..3)
+        [1,2,3]
+      when (4..6)
+        [4,5,6]
+      when (7..9)
+        [7,8,9]
+      end
+    end
+
+    def deconstruct_key(key)
+      [key[0], key[1]]
+    end
+
+    def construct_key(row, column)
+      "#{row}#{column}"
+    end
+
+    def extract_row(key)
+      key[0]
+    end
+
+    def extract_column(key)
+      key[1]
+    end
+
+    def eliminate(key, value)
+      peer_keys(key).each do |key|
+        current_values = values[key]
+        @values = values.put(key, current_values.delete(value))
+      end
+    end
+
+    private
+
+    def set_initial_values(input = nil)
+      set_empty_grid
+      if input.respond_to? :each
+        raise "Not enough cells" unless input.size == 81
+        set_values(input)
+      end
+    end
+
+    def set_values(input)
+      sorted_keys.zip(input).each do |(key, value)|
+        set_value key, value
+      end
+    end
+
+    def set_value(key, value)
+      if value == 0
+        @values = values.put(key, default_possible_values)
+      else
+        assign_and_eliminate(key, value)
+      end
+    end
+
+    def assign_and_eliminate(key, value)
+      @values = values.put(key, Hamster.set(value))
+      eliminate(key, value)
+    end
+
+    def set_empty_grid
+      @values = sorted_keys.reduce(@values) do |values, key|
+        values.put(key, default_possible_values)
+      end
     end
 
   end
