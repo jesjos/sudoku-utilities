@@ -124,4 +124,18 @@ describe Sudoku::Grid do
       end
     end
   end
+
+  describe ".new" do
+    context "when given another grid" do
+      it "creates a copy with the same values" do
+        grid2 = Sudoku::Grid.new(grid)
+        grid2.values.should eq(grid.values)
+        grid2.set("A1", [1])
+        grid2.values["A1"].should_not eq(grid.values["A1"])
+      end
+    end
+  end
+
+
+
 end
