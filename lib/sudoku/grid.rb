@@ -129,27 +129,35 @@ module Sudoku
       end
     end
 
-    private
-
-    def set_initial_values(input = nil)
-      set_empty_grid
-      if input.respond_to? :each
-        raise "Not enough cells" unless input.size == 81
-        set_values(input)
-      end
-    end
-
     def set_values(input)
       sorted_keys.zip(input).each do |(key, value)|
-        set_value key, value
+        set key, value
       end
     end
 
-    def set_value(key, value)
+    def set(key, value)
       if value == 0
         @values = values.put(key, default_possible_values)
       else
         assign_and_eliminate(key, value)
+      end
+    end
+
+    def clone
+      Grid.new(self)
+    end
+
+    private
+
+    def set_initial_values(input = nil)
+      if input.is_a? Grid
+        @values = input.values
+      else
+        set_empty_grid
+        if input.respond_to? :each
+          raise "Not enough cells" unless input.size == 81
+          set_values(input)
+        end
       end
     end
 
