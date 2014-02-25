@@ -6,8 +6,6 @@ module Sudoku
     def initialize(grid, &block)
       @grid = grid
       @callback = block
-      @visited_grids = {}
-      @solved_grids = []
     end
 
     def solve
@@ -21,40 +19,28 @@ module Sudoku
     end
 
     def solve_grid(grid)
-      if unsolvable?(grid) || visited?(grid)
-        false
-      end
-      visit(grid)
-      if solved? grid
+      if solved?(grid)
         solved_grids << grid
-        grid
-      else
-        grid.cells_by_number_of_possible_values.each do |cell|
-          cell.possible_values.each do |value|
-            new_grid = cell.set(value)
-            callback.call(new_grid) if callback
-            solve_grid(new_grid)
-          end
+        return true
+      end
+      return false if unsolvable? grid
+      grid.empty_values.each do |key, values|
+        new_grid = grid.clone
+        values.each do |value|
+          new_grid.set(key, value)
+          solve_grid(grid)
         end
       end
     end
 
-    def visit(grid)
-      visited_grids[grid.to_s] = true
-    end
-
-    def visited?(grid)
-      visited_grids.has_key? grid.to_s
+    def unsolvable?(grid)
+      grid.values.any? {|k,value| value.empty?}
     end
 
     def solved?(grid)
-      grid.regions.all? {|region| region.complete? }
+      grid.values.all? {|key, value| value.size == 1 }
     end
-
-    def unsolvable?(grid)
-      grid.cells.any? {|cell| cell.empty? && cell.no_possible_values? }
-    end
-
+    
     def benchmark
       @started_at = Time.now
       result = yield
