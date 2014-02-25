@@ -2,8 +2,16 @@ require 'curses'
 module Sudoku
   class SudokuSolver < Thor
     desc "read", "Reads a sudoku and prints it"
-    method_option :file, aliases: "-f", desc: "Read from a file and solve", required: false
+    method_option :file, aliases: "-f", desc: "Read from a file and print", required: false
     def read(*args)
+      string = read_file(*args)
+      grid = Grid.parse(string)
+      puts grid.to_s
+    end
+
+    desc "solve", "Reads a sudoku and solves it"
+    method_option :file, aliases: "-f", desc: "Read from a file and solve", required: false
+    def solve_yeah(*args)
       if path = options[:file]
         begin
           file = File.open(path)
@@ -49,6 +57,12 @@ module Sudoku
       window << "Sudoku:\n"
       window << result.to_s
       result
+    end
+
+    def read_file(*args)
+      path = options[:file]
+      file = File.open(path)
+      file.read
     end
 
     def window
