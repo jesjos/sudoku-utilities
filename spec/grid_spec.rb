@@ -135,15 +135,6 @@ describe Sudoku::Grid do
     end
   end
 
-  describe "#parse" do
-    let(:string) { File.open("./spec/test_grids/basic.txt").read }
-    describe "two-way" do
-      it "returns the same string" do
-        Sudoku::Grid.parse(string).to_s.should eq(string)
-      end
-    end
-  end
-
   describe ".new" do
     context "when given another grid" do
       it "creates a copy with the same values" do
@@ -160,6 +151,17 @@ describe Sudoku::Grid do
       grid.set("A1", 1)
       grid.empty_values.size.should eq(80)
       Set.new(grid.empty_values.keys).should eq(Set.new(grid.sorted_keys - ["A1"]))
+    end
+  end
+
+  describe ".sorted_empty_values" do
+    it "returns square with the least empty values first" do
+      grid.set("A1", 1)
+      tuple = grid.sorted_empty_values.first
+      tuple.last.size.should eq(8)
+      grid.set("A2", 2)
+      tuple = grid.sorted_empty_values.first
+      tuple.last.size.should eq(7)      
     end
   end
 
