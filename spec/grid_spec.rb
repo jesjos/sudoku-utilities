@@ -68,6 +68,8 @@ describe Sudoku::Grid do
     it "returns the correct set of keys" do
       keys = ["A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"]
       grid.box_peer_keys("A1").should eq(keys)
+      keys = ["G1", "G3", "H1", "H2", "H3", "I1", "I2", "I3"]
+      grid.box_peer_keys("G2").should eq(keys)
     end
   end
 
@@ -107,12 +109,29 @@ describe Sudoku::Grid do
     end
   end
 
-  describe ".eliminate" do
+  describe ".eliminate_from_peers_of" do
     it "eliminates the value from all peers" do
-      grid.eliminate("A1", 1)
+      grid.eliminate_from_peers_of("A1", 1)
       grid.peer_keys("A1").each do |key|
         Set.new(grid.values[key].to_a).should eq(Set.new(2.upto(9).to_a))
       end
+    end
+
+    it "returns false if trying to eliminate a square with only one possible value" do
+      grid.values = grid.values.put "A1", Hamster.set(1)
+      grid.eliminate_from_peers_of("A2", 1).should be_false
+    end
+
+    it "returns true if elimination succeeded" do
+      grid.eliminate_from_peers_of("A1", 1).should be_true
+    end
+
+    it "propagates the elimination" do
+      grid.values = grid.values.put "A1", Hamster.set(1,2)
+      grid.values = grid.values.put "A2", Hamster.set(1,2)
+      grid.values = grid.values.put "A3", Hamster.set(2,3)
+      grid.eliminate_from_peers_of("A1", 1)
+      grid.values["A3"].should eq(Hamster.set(3))
     end
   end
 
@@ -130,12 +149,18 @@ describe Sudoku::Grid do
       it "creates a copy with the same values" do
         grid2 = Sudoku::Grid.new(grid)
         grid2.values.should eq(grid.values)
-        grid2.set("A1", [1])
+        grid2.set("A1", 1)
         grid2.values["A1"].should_not eq(grid.values["A1"])
       end
     end
   end
 
-
+  describe ".empty_values" do
+    it "returns all values that have a length larger than 1" do
+      grid.set("A1", 1)
+      grid.empty_values.size.should eq(80)
+      Set.new(grid.empty_values.keys).should eq(Set.new(grid.sorted_keys - ["A1"]))
+    end
+  end
 
 end
