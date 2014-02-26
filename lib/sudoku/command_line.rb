@@ -11,7 +11,7 @@ module Sudoku
 
     desc "solve", "Reads a sudoku and solves it"
     method_option :file, aliases: "-f", desc: "Read from a file and solve", required: false
-    def solve_yeah(*args)
+    def solve(*args)
       if path = options[:file]
         begin
           file = File.open(path)
@@ -21,7 +21,7 @@ module Sudoku
           window.clear
           window << "Solving took: #{solver.total_time} seconds\n"
           window << "Sudoku:\n"
-          window << result.to_s
+          window << solver.solved_grids.first
         rescue Exception => e
           window.clear
           window << "Something went wrong, #{e.message}"
@@ -31,32 +31,11 @@ module Sudoku
       window.close
     end
 
-    desc "multiple", "Reads multiple sudokus and solves them"
-    method_option :file, aliases: "-f", desc: "Read from a file and solve multiple sudokus", required: true
-    def multiple(*args)
-      file = File.open(options[:file])
-      grids = parse_multiple(file)
-      count = grids.map {|grid| solve(grid)}.count
-      window << "Solved #{count} grids"
-      window.getch
-      window.close
-    end
-
     private
 
     def parse_multiple(file)
       content = file.read
       content.split("=\n").map {|grid| Grid.parse(grid)}
-    end
-
-    def solve(grid)
-      solver = Solver.new(grid, &print_method)
-      result = solver.solve
-      window.clear
-      window << "Solving took: #{solver.total_time} seconds\n"
-      window << "Sudoku:\n"
-      window << result.to_s
-      result
     end
 
     def read_file(*args)
