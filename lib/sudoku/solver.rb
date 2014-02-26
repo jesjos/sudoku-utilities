@@ -3,14 +3,15 @@ module Sudoku
 
     attr_reader :grid, :callback, :solved_grids, :visited_grids
 
-    def initialize(grid, &block)
+    def initialize(grid)
       @grid = grid
-      @callback = block
       @solved_grids = []
       @visited_grids = Set.new
+      @skipped = 0
     end
 
-    def solve
+    def solve(&block)
+      @callback = block
       result = benchmark do
         solve_grid(grid)
         solved_grids.any?
@@ -23,7 +24,6 @@ module Sudoku
 
     def solve_grid(grid)
       return true if visited? grid
-      callback.call("Visiting: \n" + grid.to_s + "\nSolved: #{solved_grids.size} grids\n, Visited #{@visited_grids.size} grids \n#{grid.values_to_s}") if callback
       visit(grid)
       if solved?(grid)
         solved_grids << grid
@@ -33,7 +33,12 @@ module Sudoku
       grid.sorted_empty_values.each do |(key, values)|
         values.each do |value|
           new_grid = grid.clone
-          solve_grid(new_grid) if new_grid.set(key, value)
+          if new_grid.set(key, value)
+            solve_grid(new_grid) 
+          else 
+            @skipped += 1
+          end
+          callback("Visiting: \n" + grid.to_s + "\nSolved: #{solved_grids.size} grids\n, Visited #{@visited_grids.size} grids \n#{grid.values_to_s}\nSkipped: #{@skipped}")
         end
       end
     end
@@ -59,6 +64,12 @@ module Sudoku
       result = yield
       @stopped_at = Time.now
       result
+    end
+
+    def callback(input)
+      if @callback
+        @callback.call(input)
+      end
     end
   end
 end
