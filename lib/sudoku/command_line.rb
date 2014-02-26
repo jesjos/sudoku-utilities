@@ -16,12 +16,16 @@ module Sudoku
         begin
           file = File.open(path)
           grid = Grid.parse(file.read)
-          solver = Solver.new(grid, &print_method)
-          result = solver.solve
+          solver = Solver.new(grid)
+          result = solver.solve(&print_method)
           window.clear
           window << "Solving took: #{solver.total_time} seconds\n"
-          window << "Sudoku:\n"
-          window << solver.solved_grids.first
+          if result
+            window << "Solved sudoku:\n"
+            window << solver.solved_grids.first.to_s
+          else
+            window << "Could not find an answer"
+          end
         rescue Exception => e
           window.clear
           window << "Something went wrong, #{e.message}"
