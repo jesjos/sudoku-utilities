@@ -29,5 +29,11 @@ describe Sudoku::Solver do
         solver.unsolvable?(grid).should be_true
       end
     end
+    context "when there are no empty vectors" do
+      it "is true" do
+        solver = Sudoku::Solver.new(grid)
+        solver.unsolvable?(grid).should be_false
+      end
+    end
   end
 end
