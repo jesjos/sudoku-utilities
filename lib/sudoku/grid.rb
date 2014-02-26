@@ -37,17 +37,8 @@ module Sudoku
       SORTED_KEYS
     end
 
-    # Since constraint propagation can cause some 
-    # squares to be assigned values when a grid is loaded
-    # we keep the original around to be able to produce a 
-    # string representation that makes sense
     def to_s
-      unless @original
-        source = cells_as_strings
-      else
-        source = original_input_as_strings
-      end
-      source.each_slice(9).to_a.map(&:join).join("\n")# + "\n" + values_to_s
+      cells_as_strings.each_slice(9).to_a.map(&:join).join("\n")# + "\n" + values_to_s
     end
 
     def values_to_s
@@ -56,16 +47,6 @@ module Sudoku
 
     def cells_as_strings
       sorted_keys.map {|key| to_s_cell(values[key])}
-    end
-
-    def original_input_as_strings
-      @original.map do |value|
-        if value == 0
-          "."
-        else
-          value.to_s
-        end
-      end
     end
 
     def to_s_cell(cell)
@@ -225,7 +206,6 @@ module Sudoku
 
     def set_from_array(array)
       raise "Not enough cells" unless array.size == 81
-      @original = array
       set_values(array)
     end
 
