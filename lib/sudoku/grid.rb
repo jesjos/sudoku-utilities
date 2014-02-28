@@ -9,12 +9,31 @@ module Sudoku
 
     ROW_KEYS = ("A".."I").to_a
     COLUMN_KEYS = (1..9).to_a
-    SORTED_KEYS = 
-      ROW_KEYS.reduce([]) do |keys, row| 
-        COLUMN_KEYS.reduce(keys) do |keys, column| 
-          keys << "#{row}#{column}"
+    SORTED_KEYS = ROW_KEYS.product(COLUMN_KEYS).map {|(row, column)| row + column.to_s}
+
+    ROW_UNITS = SORTED_KEYS.each_slice(9).to_a
+    COLUMN_UNITS = ROW_UNITS.transpose
+
+    # Generate keys for all of the 3x3 boxes
+    ROW_RANGES = ROW_KEYS.each_slice(3).to_a
+    COLUMN_RANGES = COLUMN_KEYS.each_slice(3).to_a
+    BOX_UNITS = ROW_RANGES.reduce([]) do |units, row_range| 
+      units += COLUMN_RANGES.map do |col_range| 
+        row_range.product(col_range).map {|(row, column)| row + column.to_s}
+      end
+    end
+
+    UNITS = ROW_UNITS + COLUMN_UNITS + BOX_UNITS
+
+    PEERS = Hash.new {|hash, key| hash[key] = Set.new}
+    SORTED_KEYS.reduce(PEERS) do |peers, key|
+      UNITS.each do |unit|
+        if unit.include? key
+          peers[key] += unit.reject {|other_key| key == other_key }
         end
       end
+      peers
+    end
 
     attr_accessor :values
     
@@ -62,60 +81,7 @@ module Sudoku
     end
 
     def peer_keys(key)
-      Set.new(row_peer_keys(key) + column_peer_keys(key) + box_peer_keys(key))
-    end
-
-    def row_peer_keys(key)
-      row = extract_row key
-      keys = column_keys.map {|column| construct_key(row, column)}
-      keys.reject{|output_key| output_key == key }
-    end
-
-    def column_peer_keys(key)
-      column = extract_column key
-      keys = row_keys.map {|row| construct_key(row, column)}
-      keys.reject{|output_key| output_key == key }
-    end
-
-    def box_peer_keys(key)
-      row_keys = box_row_keys(key)
-      column_keys = box_column_keys(key)
-      keys = row_keys.reduce([]) do |keys, row|
-        keys += column_keys.map {|col| construct_key(row, col)}
-      end
-      keys.reject{|output_key| output_key == key}
-    end
-
-    def box_row_keys(key)
-      row = extract_row key
-      case row
-      when "A".."C"
-        ["A", "B", "C"]
-      when "D".."F"
-        ["D", "E", "F"]
-      when "G".."I"
-        ["G", "H", "I"]
-      end
-    end
-
-    def box_column_keys(key)
-      column = extract_column key
-      case column.to_i
-      when (1..3)
-        [1,2,3]
-      when (4..6)
-        [4,5,6]
-      when (7..9)
-        [7,8,9]
-      end
-    end
-
-    def deconstruct_key(key)
-      [key[0], key[1]]
-    end
-
-    def construct_key(row, column)
-      "#{row}#{column}"
+      PEERS[key]
     end
 
     def extract_row(key)
@@ -127,24 +93,32 @@ module Sudoku
     end
 
     def eliminate_from_peers_of(key, value)
-      peer_keys(key).reduce(true) do |result, key|
+      debug "Eliminating #{key} => #{value}}"
+      result = peer_keys(key).reduce(true) do |result, key|
+        debug "Innerkey: #{key}"
         current_values = values[key]
         unless current_values.include? value
+          debug "Could not find #{value} in #{key} => #{current_values.inspect}"
           result &= true
         else
           new_values = current_values.delete(value)
           if new_values.empty?
+            debug "Values are now empty in #{key}"
             result &= false
           else
             @values = values.put(key, new_values)
             if new_values.size == 1
+              debug "New values have size 1: #{key} => #{new_values.inspect}"
               result &= eliminate_from_peers_of(key, new_values.first)
             else
+              debug "No need to eliminate further (#{value} in #{key} => #{new_values.inspect})"
               result &= true
             end
           end
         end
       end
+      debug "Result of eliminating #{key} => #{value}is #{result}"
+      result
     end
 
     def set_values(input)
@@ -177,6 +151,10 @@ module Sudoku
 
     def eql?(other)
       self.values.eql?(other.values)
+    end
+
+    def total_possible_values
+      values.reduce(0) {|sum, key, value| toal}
     end
 
     class << self
@@ -221,6 +199,12 @@ module Sudoku
     def set_empty_grid
       @values = sorted_keys.reduce(@values) do |values, key|
         values.put(key, default_possible_values)
+      end
+    end
+
+    def debug(string)
+      if @debug
+        debug string
       end
     end
 

@@ -50,28 +50,6 @@ describe Sudoku::Grid do
     end
   end
 
-  describe ".row_peer_keys" do
-    it "returns the correct row keys" do
-      keys = 2.upto(9).map {|n| "A#{n}"}
-      grid.row_peer_keys("A1").should eq(keys)
-    end
-  end
-
-  describe ".column_peer_keys" do
-    it "returns the set of keys" do
-      keys = "B".upto("I").map {|c| "#{c}1"}
-      grid.column_peer_keys("A1").should eq(keys)
-    end
-  end
-
-  describe ".box_peer_keys" do
-    it "returns the correct set of keys" do
-      keys = ["A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"]
-      grid.box_peer_keys("A1").should eq(keys)
-      keys = ["G1", "G3", "H1", "H2", "H3", "I1", "I2", "I3"]
-      grid.box_peer_keys("G2").should eq(keys)
-    end
-  end
 
   describe ".extract_row" do
     it "returns the first character of the key" do
@@ -82,30 +60,6 @@ describe Sudoku::Grid do
   describe ".extract_column" do
     it "returns the second character of the key" do
       grid.extract_column("A1").should eq("1")
-    end
-  end
-
-  describe ".box_row_keys" do
-    context "when given a letter in an interval" do
-      [("A".."C"), ("D".. "F"), ("G".."I")].each do |interval|
-        it "returns that interval" do
-          interval.each do |letter|
-            grid.box_row_keys("#{letter}1").should eq(interval.to_a)
-          end
-        end
-      end
-    end
-  end
-
-  describe ".box_column_keys" do
-    context "when given a letter in an interval" do
-      [(1..3), (4..6), (7..9)].each do |interval|
-        it "returns that interval" do
-          interval.each do |number|
-            grid.box_column_keys("A#{number}").should eq(interval.to_a)
-          end
-        end
-      end
     end
   end
 
