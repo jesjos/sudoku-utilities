@@ -1,5 +1,5 @@
 module Sudoku
-  module Units
+  module PeersAndUnits
     ROW_KEYS    = ("A".."I").to_a
     COLUMN_KEYS = (1..9).to_a
     SORTED_KEYS = ROW_KEYS.product(COLUMN_KEYS).map {|(row, column)| row + column.to_s}
@@ -26,6 +26,12 @@ module Sudoku
         end
       end
       peers
+    end
+
+    def units_containing(key)
+      UNITS.select do |unit|
+        unit.include? key
+      end
     end
   end
 end

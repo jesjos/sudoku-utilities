@@ -1,15 +1,28 @@
 module Sudoku
 
-  # = Grid
-  # Represents a sudoku grid.
+  # = PropagatingGrid
+  # Represents a sudoku grid. 
+  # A propagating grid uses constraint propagation to 
+  # keep track of the effects of setting the value of a square
+  # on the possible values of other squares.
   #
   # == Vocabulary
   # - Grid:   the sudoku's 9x9 grid
   # - Square: one of the 81 squares, is empty or holds a value between 1 and 9
-  # - Unit: all of the squares in a row, a column or a 3x3 box. 
-  class Grid
+  # - Unit:   all of the squares in a row, a column or a 3x3 box. 
+  #
+  # == Data structure
+  #
+  # The grid stores the possible values for each square in the grid.
+  # A square has been set if it has only one possible value.
+  #
+  # == Notes
+  # The grid takes care of constraint propagation.
+  # This means that as soon as you set a 
+
+  class PropagatingGrid
     extend Forwardable
-    include Units
+    include PeersAndUnits
 
     def_delegator :values, :hash, :hash
 
@@ -59,10 +72,6 @@ module Sudoku
       Hamster.set *(1..9).to_a
     end
 
-    def peer_keys(key)
-      PEERS[key]
-    end
-
     def extract_row(key)
       key[0]
     end
@@ -74,12 +83,6 @@ module Sudoku
     def eliminate_from_peers_of(key, value)
       peer_keys(key).all? do |key|
         eliminate(key, value)
-      end
-    end
-
-    def units_containing(key)
-      UNITS.select do |unit|
-        unit.include? key
       end
     end
 
@@ -137,7 +140,7 @@ module Sudoku
     end
 
     def clone
-      Grid.new(self)
+      PropagatingGrid.new(self)
     end
 
     def eql?(other)
@@ -159,7 +162,7 @@ module Sudoku
     private
 
     def set_initial_values(input = nil)
-      if input.is_a? Grid
+      if input.is_a? PropagatingGrid
         set_grid(input)
       else
         set_empty_grid
