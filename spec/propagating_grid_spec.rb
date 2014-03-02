@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe Sudoku::Grid do
-  let(:grid) { Sudoku::Grid.new }
+describe Sudoku::PropagatingGrid do
+  let(:grid) { Sudoku::PropagatingGrid.new }
   describe ".values" do
     it "is a hash" do
       grid.values.should respond_to(:keys)
@@ -92,7 +92,7 @@ describe Sudoku::Grid do
   describe ".new" do
     context "when given another grid" do
       it "creates a copy with the same values" do
-        grid2 = Sudoku::Grid.new(grid)
+        grid2 = Sudoku::PropagatingGrid.new(grid)
         grid2.values.should eq(grid.values)
         grid2.set("A1", 1)
         grid2.values["A1"].should_not eq(grid.values["A1"])
@@ -121,7 +121,7 @@ describe Sudoku::Grid do
 
   describe ".peers" do
     it "returns an array of length 20" do
-      Sudoku::Grid::SORTED_KEYS.each do |key|
+      Sudoku::PropagatingGrid::SORTED_KEYS.each do |key|
         grid.peer_keys(key).size.should eq(20)
       end   
     end
@@ -129,7 +129,7 @@ describe Sudoku::Grid do
 
   describe ".units_containing" do
     it "returns three units for each key" do
-      Sudoku::Grid::SORTED_KEYS.each do |key|
+      Sudoku::PropagatingGrid::SORTED_KEYS.each do |key|
         grid.units_containing(key).size.should eq(3)
       end
     end
@@ -148,7 +148,7 @@ describe Sudoku::Grid do
     context "when there is only one possible place left for a value" do
       it "eliminates those values from the other squares" do
         grid.values = grid.values.put "A1", Hamster.set(*[1,2])
-        row = Sudoku::Grid::ROW_UNITS.first
+        row = Sudoku::PropagatingGrid::ROW_UNITS.first
         other_keys = row - ["A1"]
         other_keys.each {|key| grid.values = grid.values.put key, Hamster.set(*[3,4,5,6,7,8,9]) }
         grid.eliminate_single_occurrence("A1", 2).should eq(true)

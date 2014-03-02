@@ -33,5 +33,9 @@ module Sudoku
         unit.include? key
       end
     end
+
+    def peer_keys(key)
+      PEERS[key]
+    end
   end
 end
