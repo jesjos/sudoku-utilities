@@ -57,21 +57,6 @@ module Sudoku
       true
     end
 
-    def set_values(input)
-      sorted_keys.zip(input).each do |(key, value)|
-        result = set key, value
-      end
-    end
-
-    def set(key, value)
-      if value == 0
-        # Do nothing
-        true
-      else
-        assign_and_eliminate(key, value)
-      end
-    end
-
     def empty_values
       values.select {|key, value| value.size > 1 }
     end
@@ -83,10 +68,6 @@ module Sudoku
 
     def clone
       PropagatingGrid.new(self)
-    end
-
-    def eql?(other)
-      self.values.eql?(other.values)
     end
 
     def total_possible_values
