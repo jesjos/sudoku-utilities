@@ -144,13 +144,6 @@ describe Sudoku::Grid do
     end
   end
 
-  describe ".eliminate_unitwise" do
-
-    it "" do
-      
-    end
-  end
-
   describe ".eliminate_single_occurrence" do
     context "when there is only one possible place left for a value" do
       it "eliminates those values from the other squares" do
