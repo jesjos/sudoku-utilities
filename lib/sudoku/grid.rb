@@ -117,8 +117,47 @@ module Sudoku
           end
         end
       end
+      if result
+        eliminate_pairs(key)
+      end
       debug "Result of eliminating #{key} => #{value}is #{result}"
       result
+    end
+
+    def units_containing(key)
+      UNITS.select do |unit|
+        unit.include? key
+      end
+    end
+
+    def eliminate_from(key, value)
+      current_values = value[key]
+      unless current_values.include? value
+        return true
+      end
+      new_values = current_values.delete(value)
+      if new_values.empty?
+        return false
+      end
+      if new_values.size == 1
+        return false unless eliminate_from_peers_of(key, new_values.first)
+      end
+      return false unless eliminate_pairs(key)
+      return true
+    end
+
+    def eliminate_pairs(key)
+      units_containing(key).all? do |unit|
+        1.upto(9).all? do |value|
+          eliminate_single_occurrence(unit, value)
+        end
+      end
+    end
+
+    def eliminate_single_occurrence(unit, value)
+      keys = unit.select {|key| values[key].include? value }
+      return set(keys.first, value) if keys.size == 1
+      true
     end
 
     def set_values(input)
@@ -188,7 +227,8 @@ module Sudoku
     end
 
     def assign_and_eliminate(key, value)
-      if values[key].include? value
+      current_values = values[key]
+      if current_values.include? value
         @values = values.put(key, Hamster.set(value))
         eliminate_from_peers_of(key, value)
       else

@@ -119,4 +119,49 @@ describe Sudoku::Grid do
     end
   end
 
+  describe ".peers" do
+    it "returns an array of length 20" do
+      Sudoku::Grid::SORTED_KEYS.each do |key|
+        grid.peer_keys(key).size.should eq(20)
+      end   
+    end
+  end
+
+  describe ".units_containing" do
+    it "returns three units for each key" do
+      Sudoku::Grid::SORTED_KEYS.each do |key|
+        grid.units_containing(key).size.should eq(3)
+      end
+    end
+
+    it "returns the correct units for a random key" do
+      row = (1..9).map {|column| "C#{column}"}
+      column = ("A".."I").map {|row| "#{row}7"}
+      box = ("A".."C").to_a.product((7..9).to_a).map {|(row, column)| "#{row}#{column}"}
+      [row, column, box].each do |unit|
+        grid.units_containing("C7").should include(unit)
+      end
+    end
+  end
+
+  describe ".eliminate_unitwise" do
+
+    it "" do
+      
+    end
+  end
+
+  describe ".eliminate_single_occurrence" do
+    context "when there is only one possible place left for a value" do
+      it "eliminates those values from the other squares" do
+        grid.values = grid.values.put "A1", Hamster.set(*[1,2])
+        row = Sudoku::Grid::ROW_UNITS.first
+        other_keys = row - ["A1"]
+        other_keys.each {|key| grid.values = grid.values.put key, Hamster.set(*[3,4,5,6,7,8,9]) }
+        grid.eliminate_single_occurrence(row, 2).should eq(true)
+        grid.values["A1"].should eq(Hamster.set(2))
+      end
+    end
+  end
+
 end
