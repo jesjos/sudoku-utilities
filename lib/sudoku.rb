@@ -1,7 +1,10 @@
+require 'rubygems'
+require 'bundler/setup'
 require 'thor'
 require 'forwardable'
 require 'hamster'
-['sudoku/grid',
+['sudoku/units',
+'sudoku/grid',
 'sudoku/grid_parser',
 'sudoku/solver',
 'sudoku/command_line'].each do |file|
