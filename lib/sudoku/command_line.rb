@@ -23,6 +23,7 @@ module Sudoku
           if result
             window << "Solved sudoku:\n"
             window << solver.solved_grids.first.to_s
+            window << "\nFound #{solver.solved_grids.size} solution"
           else
             window << "Could not find an answer"
           end

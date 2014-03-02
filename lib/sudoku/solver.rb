@@ -58,6 +58,10 @@ module Sudoku
     def solved?(grid)
       grid.values.all? {|key, value| value.size == 1 }
     end
+
+    def unique_solution?
+      solved_grids.size == 1      
+    end
     
     def benchmark
       @started_at = Time.now

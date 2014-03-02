@@ -93,35 +93,9 @@ module Sudoku
     end
 
     def eliminate_from_peers_of(key, value)
-      debug "Eliminating #{key} => #{value}}"
-      result = peer_keys(key).reduce(true) do |result, key|
-        debug "Innerkey: #{key}"
-        current_values = values[key]
-        unless current_values.include? value
-          debug "Could not find #{value} in #{key} => #{current_values.inspect}"
-          result &= true
-        else
-          new_values = current_values.delete(value)
-          if new_values.empty?
-            debug "Values are now empty in #{key}"
-            result &= false
-          else
-            @values = values.put(key, new_values)
-            if new_values.size == 1
-              debug "New values have size 1: #{key} => #{new_values.inspect}"
-              result &= eliminate_from_peers_of(key, new_values.first)
-            else
-              debug "No need to eliminate further (#{value} in #{key} => #{new_values.inspect})"
-              result &= true
-            end
-          end
-        end
+      peer_keys(key).all? do |key|
+        eliminate(key, value)
       end
-      if result
-        eliminate_pairs(key)
-      end
-      debug "Result of eliminating #{key} => #{value}is #{result}"
-      result
     end
 
     def units_containing(key)
@@ -130,8 +104,8 @@ module Sudoku
       end
     end
 
-    def eliminate_from(key, value)
-      current_values = value[key]
+    def eliminate(key, value)
+      current_values = values[key]
       unless current_values.include? value
         return true
       end
@@ -139,22 +113,21 @@ module Sudoku
       if new_values.empty?
         return false
       end
+      @values = @values.put(key, new_values)
       if new_values.size == 1
         return false unless eliminate_from_peers_of(key, new_values.first)
       end
-      return false unless eliminate_pairs(key)
+      return false unless eliminate_single_occurrence(key, value)
       return true
     end
 
-    def eliminate_pairs(key)
+    def eliminate_single_occurrence(key, value)
       units_containing(key).all? do |unit|
-        1.upto(9).all? do |value|
-          eliminate_single_occurrence(unit, value)
-        end
+        eliminate_single_occurrence_in_unit(unit, value)
       end
     end
 
-    def eliminate_single_occurrence(unit, value)
+    def eliminate_single_occurrence_in_unit(unit, value)
       keys = unit.select {|key| values[key].include? value }
       return set(keys.first, value) if keys.size == 1
       true
@@ -229,8 +202,10 @@ module Sudoku
     def assign_and_eliminate(key, value)
       current_values = values[key]
       if current_values.include? value
-        @values = values.put(key, Hamster.set(value))
-        eliminate_from_peers_of(key, value)
+        remaining_values = current_values.delete(value)
+        remaining_values.all? do |value_to_be_eliminated|
+          eliminate(key, value_to_be_eliminated)
+        end
       else
         false
       end

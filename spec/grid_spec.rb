@@ -158,7 +158,7 @@ describe Sudoku::Grid do
         row = Sudoku::Grid::ROW_UNITS.first
         other_keys = row - ["A1"]
         other_keys.each {|key| grid.values = grid.values.put key, Hamster.set(*[3,4,5,6,7,8,9]) }
-        grid.eliminate_single_occurrence(row, 2).should eq(true)
+        grid.eliminate_single_occurrence("A1", 2).should eq(true)
         grid.values["A1"].should eq(Hamster.set(2))
       end
     end
