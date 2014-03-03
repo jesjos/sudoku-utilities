@@ -32,7 +32,7 @@ module Sudoku
     end
 
     def to_s
-      cells_as_strings.each_slice(9).to_a.map(&:join).join("\n")# + "\n" + values_to_s
+      cells_as_strings.each_slice(9).to_a.map(&:join).join("\n")
     end
 
     def cells_as_strings
@@ -96,16 +96,28 @@ module Sudoku
     end
 
     def set(key, value)
-      if value == 0
-        # Do nothing
-        true
-      else
-        assign_and_eliminate(key, value)
-      end
+      raise "Subclasses must override"
     end
 
     def eql?(other)
       self.values.eql?(other.values)
+    end
+
+    def empty_values
+      values.select {|key, value| value.size > 1 }
+    end
+
+    def sorted_empty_values
+      hash = empty_values.reduce({}) {|mem, key, values| mem[key] = values; mem}
+      hash.sort{|(one_key, one_values), (other_key, other_values)| one_values.size <=> other_values.size}
+    end
+
+    class << self
+
+      def parse(string)
+        Sudoku::PropagatingGridParser.new.parse(string)
+      end
+
     end
 
     private

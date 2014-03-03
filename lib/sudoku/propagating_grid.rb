@@ -22,12 +22,6 @@ module Sudoku
 
   class PropagatingGrid < Grid
 
-    def eliminate_from_peers_of(key, value)
-      peer_keys(key).all? do |key|
-        eliminate(key, value)
-      end
-    end
-
     def eliminate(key, value)
       current_values = values[key]
       unless current_values.include? value
@@ -57,15 +51,6 @@ module Sudoku
       true
     end
 
-    def empty_values
-      values.select {|key, value| value.size > 1 }
-    end
-
-    def sorted_empty_values
-      hash = empty_values.reduce({}) {|mem, key, values| mem[key] = values; mem}
-      hash.sort{|(one_key, one_values), (other_key, other_values)| one_values.size <=> other_values.size}
-    end
-
     def clone
       PropagatingGrid.new(self)
     end
@@ -74,14 +59,21 @@ module Sudoku
       values.reduce(0) {|sum, key, value| toal}
     end
 
-    class << self
-
-      def parse(string)
-        Sudoku::GridParser.new.parse(string)
+    def eliminate_from_peers_of(key, value)
+      peer_keys(key).all? do |key|
+        eliminate(key, value)
       end
-
     end
-    
+
+    def set(key, value)
+      if value == 0
+        # Do nothing
+        true
+      else
+        assign_and_eliminate(key, value)
+      end
+    end
+
     private
 
     def assign_and_eliminate(key, value)

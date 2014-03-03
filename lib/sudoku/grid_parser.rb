@@ -11,8 +11,8 @@ module Sudoku
       values
     end
 
-    def parse(string)
-      Sudoku::Grid.new parse_string(string)
+    def parse(string, klass = Sudoku::PropagatingGrid)
+      klass.new parse_string(string)
     end
   end
 end
