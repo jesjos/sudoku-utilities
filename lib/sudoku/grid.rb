@@ -64,7 +64,7 @@ module Sudoku
     end
 
     def set_initial_values(input = nil)
-      if input.is_a? PropagatingGrid
+      if input.respond_to? :values
         set_grid(input)
       else
         set_empty_grid
@@ -115,7 +115,7 @@ module Sudoku
     class << self
 
       def parse(string)
-        Sudoku::PropagatingGridParser.new.parse(string)
+        Sudoku::GridParser.new.parse(string)
       end
 
     end
