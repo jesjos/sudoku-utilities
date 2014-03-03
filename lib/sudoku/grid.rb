@@ -1,4 +1,9 @@
 module Sudoku
+  # = Grid
+  # Abstract class which contains shared logic for all kinds of grids.
+  # Known subclasses:
+  # - PropagatingGrid
+  # - NonPropagatingGrid
   class Grid
     extend Forwardable
     include PeersAndUnits
