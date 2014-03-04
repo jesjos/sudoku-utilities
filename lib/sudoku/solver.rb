@@ -10,11 +10,19 @@ module Sudoku
       @skipped = 0
     end
 
-    def solve(&block)
+    def solve(opts = {}, &block)
+      defaults = {check_uniqueness: true}
+      options = opts.merge(defaults)
       @callback = block
-      result = benchmark do
-        solve_grid(grid)
-        solved_grids.any?
+      if opts[:check_uniqueness]
+        result = benchmark do
+          solve_grid_with_uniqueness(grid)
+          solved_grids.any?
+        end
+      else
+        result = benchmark do
+          solve_grid(grid)
+        end
       end
     end
 
@@ -22,7 +30,7 @@ module Sudoku
       @stopped_at - @started_at
     end
 
-    def solve_grid(grid)
+    def solve_grid_with_uniqueness(grid)
       return true if visited? grid
       visit(grid)
       if solved?(grid)
@@ -34,11 +42,32 @@ module Sudoku
         values.each do |value|
           new_grid = grid.clone
           if new_grid.set(key, value)
-            solve_grid(new_grid) 
+            solve_grid_with_uniqueness(new_grid) 
           else 
             @skipped += 1
           end
           callback("Visiting: \n" + grid.to_s + "\nSolved: #{solved_grids.size} grids\n, Visited #{@visited_grids.size} grids \n#{grid.values_to_s}\nSkipped: #{@skipped}")
+        end
+      end
+    end
+
+    def solve_grid(grid)
+      return false if visited? grid
+      visit(grid)
+      if solved? grid
+        solved_grids << grid
+        puts "Solved"
+        return true
+      end
+      return false if unsolvable? grid
+      grid.sorted_empty_values.any? do |(key, values)|
+        values.any? do |value|
+          new_grid = grid.clone
+          if new_grid.set(key, value)
+            solve_grid(new_grid)
+          else
+            false
+          end
         end
       end
     end
