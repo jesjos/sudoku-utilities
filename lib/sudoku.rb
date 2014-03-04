@@ -7,6 +7,7 @@ require 'hamster'
 'sudoku/grid',
 'sudoku/propagating_grid',
 'sudoku/non_propagating_grid',
+'sudoku/difficulty_analyzer',
 'sudoku/grid_parser',
 'sudoku/solver',
 'sudoku/command_line'].each do |file|
