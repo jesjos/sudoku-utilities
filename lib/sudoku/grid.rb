@@ -128,9 +128,5 @@ module Sudoku
       end
     end
 
-    def assign_and_eliminate(*)
-      raise "Must be overridden"
-    end
-
   end
 end
