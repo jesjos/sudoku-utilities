@@ -114,8 +114,8 @@ module Sudoku
 
     class << self
 
-      def parse(string)
-        Sudoku::GridParser.new.parse(string)
+      def parse(*args)
+        Sudoku::GridParser.new.parse(*args)
       end
 
     end
