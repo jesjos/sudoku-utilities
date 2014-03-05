@@ -41,6 +41,8 @@ module Sudoku
       return true
     end
 
+    # Checks if there's only one possible position left
+    # for a value in all units which contain the given key
     def eliminate_single_occurrence(key, value)
       units_containing(key).all? do |unit|
         eliminate_single_occurrence_in_unit(unit, value)
