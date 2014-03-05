@@ -1,9 +1,8 @@
 module Sudoku
   class DifficultyAnalyzer
 
-    attr_reader :grid
-
-    def initialize(grid)
+    attr_accessor :grid
+    def initialize(grid = nil)
       @grid = grid
     end
 
