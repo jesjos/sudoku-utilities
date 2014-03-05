@@ -10,9 +10,13 @@ module Sudoku
       @skipped = 0
     end
 
+    def solution
+      solved_grids.first
+    end
+
     def solve(opts = {}, &block)
       defaults = {check_uniqueness: true}
-      options = opts.merge(defaults)
+      options = defaults.merge(opts)
       @callback = block
       if opts[:check_uniqueness]
         result = benchmark do
@@ -22,6 +26,7 @@ module Sudoku
       else
         result = benchmark do
           solve_grid(grid)
+          solved_grids.length == 1
         end
       end
     end
@@ -30,7 +35,18 @@ module Sudoku
       @stopped_at - @started_at
     end
 
+    # The each enumerator will enumerate all solutions, which is needed
+    # for uniqueness checks
     def solve_grid_with_uniqueness(grid)
+      solve_with_enumerator(:each, grid)
+    end
+
+    # The any? enumerator will terminate as soon as we find a solution
+    def solve_grid(grid)
+      solve_with_enumerator(:any?, grid)
+    end
+
+    def solve_with_enumerator(enumerator, grid)
       return true if visited? grid
       visit(grid)
       if solved?(grid)
@@ -38,36 +54,20 @@ module Sudoku
         return true
       end
       return false if unsolvable? grid
-      grid.sorted_empty_values.each do |(key, values)|
-        values.each do |value|
+      search_with_enumerator(enumerator, grid)
+    end
+
+    def search_with_enumerator(enumerator, grid)
+      grid.sorted_empty_values.send(enumerator) do |(key, values)|
+        values.send(enumerator) do |value|
           new_grid = grid.clone
-          if new_grid.set(key, value)
-            solve_grid_with_uniqueness(new_grid) 
+          if valid_move = new_grid.set(key, value)
+            solve_with_enumerator(enumerator, new_grid) 
           else 
             @skipped += 1
           end
-          callback("Visiting: \n" + grid.to_s + "\nSolved: #{solved_grids.size} grids\n, Visited #{@visited_grids.size} grids \n#{grid.values_to_s}\nSkipped: #{@skipped}")
-        end
-      end
-    end
-
-    def solve_grid(grid)
-      return false if visited? grid
-      visit(grid)
-      if solved? grid
-        solved_grids << grid
-        puts "Solved"
-        return true
-      end
-      return false if unsolvable? grid
-      grid.sorted_empty_values.any? do |(key, values)|
-        values.any? do |value|
-          new_grid = grid.clone
-          if new_grid.set(key, value)
-            solve_grid(new_grid)
-          else
-            false
-          end
+          callback(grid)
+          valid_move
         end
       end
     end
@@ -99,9 +99,13 @@ module Sudoku
       result
     end
 
-    def callback(input)
+    def callback(grid)
       if @callback
-        @callback.call(input)
+        output = "Visiting: \n" + grid.to_s
+        output += "\nSolved: #{solved_grids.size} grids\n,"
+        output += "Visited #{@visited_grids.size} grids\n"
+        output += "#{grid.values_to_s}\nSkipped: #{@skipped}"
+        @callback.call(output)
       end
     end
   end
