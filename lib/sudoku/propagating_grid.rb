@@ -10,6 +10,7 @@ module Sudoku
   # - Grid:   the sudoku's 9x9 grid
   # - Square: one of the 81 squares, is empty or holds a value between 1 and 9
   # - Unit:   all of the squares in a row, a column or a 3x3 box. 
+  # - Peer:   for a given square, the peers are the squares that are in the same unit(s)
   #
   # == Data structure
   #
@@ -18,8 +19,9 @@ module Sudoku
   #
   # == Notes
   # The grid takes care of constraint propagation.
-  # This means that as soon as you set a 
-
+  # This means that as soon as you set the value of a square,
+  # we eliminate that value from the possible values of the peers
+  # of that square
   class PropagatingGrid < Grid
 
     def eliminate(key, value)
