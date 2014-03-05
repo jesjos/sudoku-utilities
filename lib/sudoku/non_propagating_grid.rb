@@ -26,6 +26,10 @@ module Sudoku
     def to_propagating_grid
       PropagatingGrid.new values_array
     end
+
+    def reset(key)
+      @values = values.put(key, default_possible_values)
+    end
     
   end
 end

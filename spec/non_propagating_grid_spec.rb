@@ -11,4 +11,12 @@ describe Sudoku::NonPropagatingGrid do
     end
   end
 
+  describe ".reset" do
+    it "sets the square to all possible values" do
+      grid.set("A1", 1)
+      grid.reset("A1")
+      grid.values["A1"].size.should eq(9)
+    end
+  end
+
 end
