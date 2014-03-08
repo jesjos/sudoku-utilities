@@ -11,15 +11,31 @@ module Sudoku
 
     def generate(difficulty = "easy")
       grid = start_grid
-      keys = randomized_keys
-      while !correct_difficulty?(difficulty, grid) do
-        key = keys.shift
-        grid.reset(key)
-        while !uniquely_solvable?(grid)
-          key = keys.shift
-          new_grid = grid.reset(key)
+      keys = Hamster.list(randomized_keys)
+      search(grid, difficulty, keys)
+    end
+
+    def search(grid, difficulty, keys)
+      raise "Could not generate a grid" if keys.empty?
+      return grid if done_generating?(grid, difficulty)
+      keys.reduce(nil) do |found_grid, key|
+        new_grid = grid.clone
+        new_grid.reset(key)
+        if uniquely_solvable? new_grid
+          new_keys = Hamster.list(*new_grid.assigned_keys.to_a.shuffle)
+          return search(new_grid, difficulty, new_keys)
+        else
+          return false
         end
       end
+    end
+
+    def done_generating?(grid, difficulty)
+      enough_empty_squares?(grid) && correct_difficulty?(difficulty, grid) && uniquely_solvable?(grid)
+    end
+
+    def enough_empty_squares?(grid)
+      grid.empty_values.size > 40
     end
 
     def uniquely_solvable?(grid)
@@ -28,11 +44,8 @@ module Sudoku
     end
 
     def randomized_keys
-      keys = SORTED_KEYS.to_set
-      output = Set.new
-      while keys.any? do
-        random_key = gaussian_random_key
-      end
+      keys = SORTED_KEYS.clone
+      keys.shuffle
     end
 
     def correct_difficulty?(difficulty, grid)
@@ -41,7 +54,7 @@ module Sudoku
     end
 
     def start_grid
-      solve(seed.to_propagating_grid)
+      solve(seed).to_non_propagating_grid
     end
 
     def solve(grid)
@@ -62,32 +75,6 @@ module Sudoku
 
     def linear_random
       rand(8) + 1
-    end
-
-    def gaussian_random_row
-      n = gaussian_random - 1
-      ROW_KEYS[n]
-    end
-
-    # returns a normally distributed random value between 1 and 9
-    def gaussian_random
-      value = raw_gaussian_value
-      while !valid_value? value
-        value = raw_gaussian_value
-      end
-      value
-    end
-
-    def gaussian_random_key
-      "#{gaussian_random_row}#{gaussian_random}"
-    end
-
-    def valid_value?(n)
-      n > 0 && n < 10
-    end
-
-    def raw_gaussian_value
-      @gaussian_generator.call.round
     end
   end
 end

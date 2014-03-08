@@ -26,36 +26,10 @@ describe Sudoku::Generator do
     end
   end
 
-  describe ".gaussian_random" do
-    it "returns an integer between 1 and 9" do
-      100.times do
-        n = gen.gaussian_random
-        n.should be > 0
-        n.should be < 10
-      end
-    end
-  end
-
-  describe ".gaussian_random_row" do
-    it "returns a letter between A and I" do
-      100.times do
-        c = gen.gaussian_random_row
-        c.should_not be_nil
-        ("A".."I").to_a.should include(c)
-      end
-    end
-  end
-
   describe ".start_grid" do
     it "returns a completely filled grid" do
       grid = gen.start_grid
       grid.empty_values.should be_empty
-    end
-  end
-
-  describe ".gaussian_random_key" do
-    it "returns a valid key" do
-      100.times { Sudoku::PeersAndUnits::SORTED_KEYS.should include gen.gaussian_random_key}
     end
   end
 
@@ -72,6 +46,23 @@ describe Sudoku::Generator do
 
     it "return false if the difficulties do not match" do
       gen.correct_difficulty?("easy", medium)
+    end
+  end
+
+  # describe ".generate" do
+  #   let(:analyzer) { Sudoku::DifficultyAnalyzer.new }
+  #   ["easy", "medium", "hard", "samuraj"].each do |diff|
+  #     it "returns a grid of the correct difficulty" do
+  #       grid = gen.generate(diff)
+  #       analyzer.grid = grid
+  #       analyzer.difficulty.should eq diff
+  #     end
+  #   end
+  # end
+
+  describe ".randomized_keys" do
+    it "returns all keys" do
+      gen.randomized_keys.to_set.should eq Sudoku::PeersAndUnits::SORTED_KEYS.to_set
     end
   end
 end
