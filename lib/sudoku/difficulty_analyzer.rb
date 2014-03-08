@@ -2,7 +2,7 @@ module Sudoku
   class DifficultyAnalyzer
 
     attr_accessor :grid
-    def initialize(grid = nil)
+    def initialize(grid = NullObject.new)
       @grid = grid
     end
 
