@@ -47,6 +47,7 @@ module Sudoku
       end
     end
 
+    # Used to inspect the possible values 
     def values_to_s
       sorted_keys.map {|key| "#{key} => #{values[key].inspect}"}.join(", ")
     end
@@ -107,9 +108,20 @@ module Sudoku
       values.select {|key, value| value.size > 1 }
     end
 
+    def assigned_keys
+      values.reduce(Hamster.list) do |memo, key, value|
+        memo = memo.cons(key) if value.length == 1
+        memo
+      end
+    end
+
     def sorted_empty_values
       hash = empty_values.reduce({}) {|mem, key, values| mem[key] = values; mem}
       hash.sort{|(one_key, one_values), (other_key, other_values)| one_values.size <=> other_values.size}
+    end
+
+    def to_propagating_grid
+      PropagatingGrid.new(self)
     end
 
     class << self

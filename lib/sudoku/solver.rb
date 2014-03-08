@@ -4,7 +4,7 @@ module Sudoku
     attr_reader :grid, :callback, :solved_grids, :visited_grids
 
     def initialize(grid)
-      @grid = grid
+      @grid = grid.to_propagating_grid
       @solved_grids = []
       @visited_grids = Set.new
       @skipped = 0

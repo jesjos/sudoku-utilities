@@ -55,6 +55,10 @@ module Sudoku
       true
     end
 
+    def to_propagating_grid
+      self
+    end
+
     def clone
       PropagatingGrid.new(self)
     end
@@ -76,6 +80,10 @@ module Sudoku
       else
         assign_and_eliminate(key, value)
       end
+    end
+
+    def to_non_propagating_grid
+      NonPropagatingGrid.new(self)
     end
 
     private
