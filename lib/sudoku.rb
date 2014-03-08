@@ -11,6 +11,7 @@ require 'distribution'
 'sudoku/difficulty_analyzer',
 'sudoku/grid_parser',
 'sudoku/solver',
+'sudoku/null_object',
 'sudoku/generator',
 'sudoku/command_line'].each do |file|
   require File.expand_path(file, File.dirname(__FILE__)) 
