@@ -1,5 +1,5 @@
 - unless @error
-  - if @solved
+  - unless @sudoku.empty?
     %h1 Solution
     .well.code= @sudoku
     %h2 Unique solution?
