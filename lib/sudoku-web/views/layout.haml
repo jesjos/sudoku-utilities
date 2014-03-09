@@ -1,0 +1,33 @@
+!!! 5
+%html.no-js{:lang => "en"}
+
+%head
+  %meta{:charset => "utf-8"}
+  %title Sudoku Solver v0.1
+
+  %link{rel: "stylesheet", href: "/css/base.css"}
+  %link{rel: "stylesheet", href: "/vendor/css/bootstrap.min.css"}
+
+  %script{src: "/vendor/js/jquery-2.1.0.min.js"}
+  %script{src: "/vendor/js/spin.min.js"}
+  %script{src: "/vendor/js/bootstrap.min.js"}
+  %script{src: "/vendor/js/backbone.marionette/underscore.js"}
+  %script{src: "/vendor/js/backbone.marionette/backbone.js"}
+  %script{src: "/vendor/js/backbone.marionette/backbone.marionette.min.js"}
+  %script{src: "/application.js"}
+
+%body
+  .jumbotron
+    .container
+      %h1 Sudoku Utilities
+      %p Solve Sudokus, analyze their difficulty, generate Sudokus
+      %ul.nav.nav-pills
+        %li{class: @solver_class}
+          %a{href: "/solver"} Solver
+        %li{class: @generator_class}
+          %a{href: "/generator"} Generator
+        %li{class: @analyzer_class}
+          %a{href: "/analyzer"} Analyzer
+
+  .container
+    = yield

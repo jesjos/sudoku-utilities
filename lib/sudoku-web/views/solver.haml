@@ -1,0 +1,12 @@
+%h1 Solve a Sudoku
+%p Enter your sudoku below.
+%p Example input:
+.well.code
+  = @example_sudoku
+
+%form{method: :post, action: "/solve", role: "form"}
+  .form-group
+    %p Your sudoku
+    %textarea.form-control.code{name: "sudoku", cols: 9, rows: 9}
+  .form-group
+    %button#submit-button.btn.btn-submit{type: "submit"} Submit

@@ -1,0 +1,14 @@
+- unless @error
+  %h1 
+    Generated a
+    = @difficulty
+    sudoku
+  %p Your sudoku
+  .well.code
+    = @sudoku
+  %h2
+    Difficulty:
+    = @difficulty
+- else
+  %h1 An error occurred:
+  %p= @error

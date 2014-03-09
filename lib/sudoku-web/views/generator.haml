@@ -1,0 +1,12 @@
+%h1 Generator
+%p Choose a difficulty and click generate to get a new Sudoku.
+
+%form{method: :post, action: "/generate", role: "form"}
+  .form-group
+    %p Difficulty
+    %select{name: :difficulty}
+      - @difficulties.each do |difficulty|
+        %option{value: difficulty}
+          = difficulty.capitalize
+  .form-group
+    %button#submit-button.btn.btn-submit{type: "submit"} Submit

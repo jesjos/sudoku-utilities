@@ -1,0 +1,9 @@
+%h1 Analyze difficulty
+%p Enter a Sudoku below and click analyze to see how hard it is.
+
+%form{method: :post, action: "/analyze", role: "form"}
+  .form-group
+    %p Your sudoku
+    %textarea.form-control.code{name: "sudoku", cols: 9, rows: 9}
+  .form-group
+    %button#submit-button.btn.btn-submit{type: "submit"} Submit

@@ -1,0 +1,8 @@
+- unless @error
+  %h1 Solution
+  .well.code= @sudoku
+  %h2 Unique solution?
+  %p= @unique
+- else
+  %h1 An error occurred:
+  %p= @error
