@@ -1,8 +1,11 @@
 - unless @error
-  %h1 Solution
-  .well.code= @sudoku
-  %h2 Unique solution?
-  %p= @unique
+  - if @solved
+    %h1 Solution
+    .well.code= @sudoku
+    %h2 Unique solution?
+    %p= @unique
+  - else
+    %h1 No solution found
 - else
   %h1 An error occurred:
   %p= @error

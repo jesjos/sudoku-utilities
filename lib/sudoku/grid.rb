@@ -124,6 +124,25 @@ module Sudoku
       PropagatingGrid.new(self)
     end
 
+    def valid?
+      UNITS.all? do |unit|
+        unit_valid?(unit)
+      end
+    end
+
+    def unit_valid?(unit)
+      unit_values = unit.map {|key| values[key] }
+      all_filled?(unit_values) && all_numbers_present?(unit_values)
+    end
+
+    def all_filled?(values)
+      values.all? {|vs| vs.size == 1}
+    end
+
+    def all_numbers_present?(values)
+      values.reduce(Set.new) { |memo, value| memo.add(value); memo}.size == 9
+    end
+
     class << self
 
       def parse(*args)

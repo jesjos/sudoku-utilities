@@ -85,7 +85,7 @@ module Sudoku
     end
 
     def solved?(grid)
-      grid.values.all? {|key, value| value.size == 1 }
+      grid.values.all? {|key, value| value.size == 1 } && grid.valid?
     end
 
     def unique_solution?

@@ -75,8 +75,8 @@ post '/solve' do
   begin
     @grid = Sudoku::Grid.parse @sudoku
     @solver = Sudoku::Solver.new(@grid)
-    @solver.solve
-    redirect to(construct_solved_url(solution: @solver.solution.to_s, unique: @solver.unique_solution?))
+    result = @solver.solve
+    redirect to(construct_solved_url(solved: result, solution: @solver.solution.to_s, unique: @solver.unique_solution?))
   rescue Exception => e
     error = "Could not parse your Sudoku <br>" + e.message
     redirect to(construct_solved_url(error: error))
