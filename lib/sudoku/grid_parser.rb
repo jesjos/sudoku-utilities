@@ -15,7 +15,7 @@ module Sudoku
     end
 
     def sanitize_line(line)
-      line.strip.gsub("\r", "")
+      line.strip.gsub("/\s+/", "")
     end
 
     def parse(string, klass = Sudoku::PropagatingGrid)
