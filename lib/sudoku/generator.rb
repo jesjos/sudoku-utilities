@@ -2,6 +2,8 @@ module Sudoku
   class Generator
     include PeersAndUnits
 
+    VALID_DIFFICULTIES = ["easy", "medium", "hard", "samuraj"]
+
     attr_reader :difficulty_analyzer
 
     def initialize
@@ -9,9 +11,14 @@ module Sudoku
     end
 
     def generate(difficulty = "easy")
+      check_difficulty!(difficulty)
       grid = start_grid
       keys = Hamster.list(randomized_keys)
       search(grid, difficulty, keys)
+    end
+
+    def check_difficulty!(difficulty)
+      raise "Invalid difficulty" unless VALID_DIFFICULTIES.include?(difficulty)
     end
 
     def search(grid, difficulty, keys)
