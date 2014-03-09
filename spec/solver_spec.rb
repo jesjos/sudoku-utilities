@@ -8,6 +8,7 @@ describe Sudoku::Solver do
       it "is true" do
         values = grid.sorted_keys.reduce({}) {|hash, key| hash[key] = [1]; hash}
         grid.values = Hamster.hash values
+        grid.stub(:valid?).and_return(true) # skip validity check...
         solver = Sudoku::Solver.new(grid)
         solver.solved?(grid).should be_true
       end
@@ -33,6 +34,16 @@ describe Sudoku::Solver do
       it "is true" do
         solver = Sudoku::Solver.new(grid)
         solver.unsolvable?(grid).should be_false
+      end
+    end
+  end
+
+  context "when sudoku is unsolvable" do
+    let(:unsolvable_grid) { Sudoku::Grid.parse(File.open("./spec/test_grids/unsolvable.txt").read) }
+    describe ".solve" do
+      it "returns false" do
+        solver = Sudoku::Solver.new(unsolvable_grid)
+        solver.solve.should eq(false)
       end
     end
   end
