@@ -5,7 +5,6 @@ module Sudoku
     attr_reader :difficulty_analyzer
 
     def initialize
-      @gaussian_generator = Distribution::Normal.rng(4.5, 3)
       @difficulty_analyzer = DifficultyAnalyzer.new
     end
 
