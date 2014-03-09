@@ -11,10 +11,17 @@ describe Sudoku::GridParser do
   end
 
   describe ".parse_string" do
+    let(:output) { Array.new(9, (1..9).to_a).flatten }
     it "returns an array of integers" do
-      string = "123456789\n123456789"
+      string = Array.new(9, "123456789").join("\n")
       values = parser.parse_string(string)
-      values.should eq((1..9).to_a + (1..9).to_a)
+      values.should eq(output)
+    end
+
+    it "handles \\n and \\r" do
+      string = Array.new(9, (1..9).to_a.join).join("\r\n")
+      values = parser.parse_string(string)
+      values.should eq(output)
     end
   end
 end
