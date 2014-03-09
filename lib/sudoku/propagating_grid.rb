@@ -21,7 +21,8 @@ module Sudoku
   # The grid takes care of constraint propagation.
   # This means that as soon as you set the value of a square,
   # we eliminate that value from the possible values of the peers
-  # of that square
+  # of that square. In other words - setting all given values of
+  # a Sudoku to a Propagating Grid may be enough to solve it.
   class PropagatingGrid < Grid
 
     def eliminate(key, value)
@@ -75,7 +76,6 @@ module Sudoku
 
     def set(key, value)
       if value == 0
-        # Do nothing
         true
       else
         assign_and_eliminate(key, value)
@@ -85,8 +85,6 @@ module Sudoku
     def to_non_propagating_grid
       NonPropagatingGrid.new(self)
     end
-
-    private
 
     def assign_and_eliminate(key, value)
       current_values = values[key]
